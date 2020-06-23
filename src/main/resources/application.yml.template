@@ -1,0 +1,15 @@
+spring:
+ datasource:
+  url: <DB_SOURCE>/<DB_NAME>
+  username: <DB_USERNAME>
+  password: <DB_PASSWORD>
+ jpa:
+  hibernate.ddl-auto: update
+  show-sql: true
+  properties.hibernate.format_sql: true
+ sendgrid:
+  api-key: <SENDGRID_API>
+ profiles:
+  active: <DEFAULT_PROFILE>
+
+jwt.secret: <JWT_SECRET>

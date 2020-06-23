@@ -1,0 +1,17 @@
+#DEV OP
+## DATABASES
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/tajyire_local_db
+    username: postgres
+    password: 123
+  jpa:
+    hibernate.ddl-auto: update
+    show-sql: true
+    properties.hibernate.format_sql: true
+  sendgrid:
+    api-key: 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
+  profiles:
+    active: dev
+
+jwt.secret: secret
