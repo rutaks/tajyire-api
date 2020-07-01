@@ -48,7 +48,7 @@ public class AuthController {
       if (!userDetailsService.isAdmin(userDetails.getPerson()))
         throw new CustomAuthenticationException(ACCOUNT_NOT_FOUND_MESSAGE);
       final String jwt = jwtUtil.generateToken(userDetails);
-      AuthResponseDTO dto = new AuthResponseDTO(jwt);
+      AuthResponseDTO dto = new AuthResponseDTO(jwt, userDetails.getPerson());
       ApiResponse response = new ApiResponse(HttpStatus.OK, "Login Successful", dto);
       return ResponseEntity.ok(response);
     } catch (BadCredentialsException e) {
@@ -65,7 +65,7 @@ public class AuthController {
       if (!userDetailsService.isClient(userDetails.getPerson()))
         throw new CustomAuthenticationException(ACCOUNT_NOT_FOUND_MESSAGE);
       final String jwt = jwtUtil.generateToken(userDetails);
-      AuthResponseDTO dto = new AuthResponseDTO(jwt);
+      AuthResponseDTO dto = new AuthResponseDTO(jwt, userDetails.getPerson());
       ApiResponse response = new ApiResponse(HttpStatus.OK, "Login Successful", dto);
       return ResponseEntity.ok(response);
     } catch (BadCredentialsException e) {

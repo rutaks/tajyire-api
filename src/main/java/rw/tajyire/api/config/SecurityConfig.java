@@ -36,6 +36,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     httpSecurity
         .csrf()
         .disable()
+        .cors()
+        .and()
         .authorizeRequests()
         .antMatchers(ConstantUtil.v1Prefix + "/hello")
         .access("hasRole('ROLE_ADMIN')")
@@ -53,12 +55,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     httpSecurity.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
   }
 
+
   @Bean
   public WebMvcConfigurer corsConfigurer() {
     return new WebMvcConfigurer() {
       @Override
       public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**").allowedOrigins("http://localhost:3000");
+        registry
+            .addMapping("/**")
+            .allowedMethods("*")
+            .allowedOrigins(
+                "http://localhost:3000");
       }
     };
   }

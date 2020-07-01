@@ -1,5 +1,6 @@
 package rw.tajyire.api.util;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import java.io.IOException;
 import java.time.DateTimeException;
 import java.util.Arrays;
@@ -30,7 +31,7 @@ import rw.tajyire.api.model.ApiResponse;
 @Slf4j
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
-  @ExceptionHandler({CustomAuthenticationException.class})
+  @ExceptionHandler({CustomAuthenticationException.class, ExpiredJwtException.class})
   public ResponseEntity<ApiResponse> handleAccessDeniedException(Exception ex) {
     log.error(Arrays.toString(ex.getStackTrace()));
     ApiResponse body = new ApiResponse(HttpStatus.UNAUTHORIZED, ex.getMessage(), null);
@@ -46,6 +47,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     ApiResponse body = new ApiResponse(HttpStatus.NOT_FOUND, ex.getLocalizedMessage(), null);
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
   }
+
+//  ExpiredJwtException
 
   @ExceptionHandler({MismatchException.class, DateTimeException.class, ValidationException.class,
       UsernameNotFoundException.class})

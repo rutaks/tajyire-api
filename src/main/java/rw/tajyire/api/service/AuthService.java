@@ -26,8 +26,9 @@ import rw.tajyire.api.model.Person;
 import rw.tajyire.api.model.ResetPasswordToken;
 import rw.tajyire.api.repo.AccountRepo;
 import rw.tajyire.api.repo.AuthRepo;
-import rw.tajyire.api.repo.ResetPasswordTokenRepo;
 import rw.tajyire.api.repo.ClientRepo;
+import rw.tajyire.api.repo.PersonRepo;
+import rw.tajyire.api.repo.ResetPasswordTokenRepo;
 import rw.tajyire.api.util.DateUtil;
 
 @Service
@@ -36,6 +37,7 @@ public class AuthService implements UserDetailsService {
   @Autowired PasswordEncoder passwordEncoder;
   @Autowired private AuthRepo authRepo;
   @Autowired private ClientRepo clientRepo;
+  @Autowired private PersonRepo personRepo;
   @Autowired private AccountRepo accountRepo;
   @Autowired private ResetPasswordTokenRepo resetPasswordTokenRepo;
   @Autowired private MailService mailService;
@@ -90,9 +92,8 @@ public class AuthService implements UserDetailsService {
 
   public void sendForgotPasswordRequest(String email, HttpServletRequest request)
       throws IOException {
-    Optional<Client> user = clientRepo.findByEmail(email);
+    Optional<Person> user = personRepo.findByEmail(email);
     user.orElseThrow(() -> new EntityNotFoundException("Could not find user with email: " + email));
-
     Optional<Auth> auth = authRepo.findByPerson(user.get());
     auth.orElseThrow(
         () -> new EntityNotFoundException("Could not find user auth account with email: " + email));
@@ -122,11 +123,11 @@ public class AuthService implements UserDetailsService {
             + url);
   }
 
-  public boolean isAdmin(Person person){
+  public boolean isAdmin(Person person) {
     return person.getClass().isAssignableFrom(Admin.class);
   }
 
-  public boolean isClient(Person person){
+  public boolean isClient(Person person) {
     return person.getClass().isAssignableFrom(Client.class);
   }
 }

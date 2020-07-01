@@ -74,4 +74,7 @@ public abstract class Person {
   public Client toUser() {
     return (Client) this;
   }
+  public Admin toAdmin() {
+    return (Admin) this;
+  }
 }
