@@ -9,11 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import rw.tajyire.api.exception.OperationFailedException;
-import rw.tajyire.api.model.Account;
 import rw.tajyire.api.model.Admin;
 import rw.tajyire.api.model.Auth;
 import rw.tajyire.api.model.Client;
-import rw.tajyire.api.repo.AccountRepo;
 import rw.tajyire.api.repo.AdminRepo;
 import rw.tajyire.api.repo.AuthRepo;
 import rw.tajyire.api.repo.ClientRepo;
@@ -30,7 +28,6 @@ public class UserSeeders {
   @Autowired private ClientRepo clientRepo;
   @Autowired private AdminRepo adminRepo;
   @Autowired private AuthRepo authRepo;
-  @Autowired private AccountRepo accountRepo;
 
   public boolean seed() {
     try {
@@ -51,8 +48,6 @@ public class UserSeeders {
 
       Client client = new Client("User", "Two", "male", new Date(), "rootsum.dev@gmail.com");
       clientRepo.save(client);
-      Account account = new Account(client);
-      accountRepo.save(account);
       Auth auth2 = new Auth(client, "user1", passwordEncoder.encode("Password123!"), normalRole);
       authRepo.save(auth2);
     } catch (Exception e) {
