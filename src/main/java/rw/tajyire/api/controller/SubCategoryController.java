@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import rw.tajyire.api.dto.category.SubCategoryDTO;
 import rw.tajyire.api.model.ApiResponse;
 import rw.tajyire.api.model.Auth;
+import rw.tajyire.api.model.Product;
 import rw.tajyire.api.model.SubCategory;
 import rw.tajyire.api.service.SubCategoryService;
 import rw.tajyire.api.util.ConstantUtil;
@@ -39,6 +40,20 @@ public class SubCategoryController {
     Page<SubCategory> categoryPage = subCategoryService.getSubCategories(page, size);
     ApiResponse response =
         new ApiResponse(HttpStatus.OK, "Categories retrieved successfully", categoryPage);
+    return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/{subCategoryUuId}/products}")
+  public ResponseEntity<?> getProducts(
+      @PathVariable String subCategoryUuId,
+      @RequestParam(defaultValue = "0") Integer page,
+      @RequestParam(defaultValue = "10") Integer size,
+      @RequestParam(defaultValue = "id") String sortBy,
+      @RequestParam(defaultValue = "DESC") Sort.Direction sortDirection) {
+    Page<Product> productPage = subCategoryService
+        .getSubCategoryProducts(subCategoryUuId, page, size);
+    ApiResponse response =
+        new ApiResponse(HttpStatus.OK, "Category's products retrieved successfully", productPage);
     return ResponseEntity.ok(response);
   }
 
