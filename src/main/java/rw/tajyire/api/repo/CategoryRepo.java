@@ -1,5 +1,6 @@
 package rw.tajyire.api.repo;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,4 +13,6 @@ import rw.tajyire.api.model.Category;
 public interface CategoryRepo extends JpaRepository<Category, Long> {
   Optional<Category> findByIdAndDeletedIsFalse(Long categoryId);
   Page<Category> findByDeletedIsFalse(Pageable pageable);
+  List<Category> findByDeletedIsFalse();
+  Optional<Category> findByUuidAndDeletedIsFalse(String categoryUuId);
 }

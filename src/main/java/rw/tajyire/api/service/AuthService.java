@@ -18,13 +18,11 @@ import rw.tajyire.api.dto.auth.RegisterRequestDTO;
 import rw.tajyire.api.dto.auth.ResetPasswordDTO;
 import rw.tajyire.api.exception.EntityNotFoundException;
 import rw.tajyire.api.exception.MismatchException;
-import rw.tajyire.api.model.Account;
 import rw.tajyire.api.model.Admin;
 import rw.tajyire.api.model.Auth;
 import rw.tajyire.api.model.Client;
 import rw.tajyire.api.model.Person;
 import rw.tajyire.api.model.ResetPasswordToken;
-import rw.tajyire.api.repo.AccountRepo;
 import rw.tajyire.api.repo.AuthRepo;
 import rw.tajyire.api.repo.ClientRepo;
 import rw.tajyire.api.repo.PersonRepo;
@@ -38,7 +36,6 @@ public class AuthService implements UserDetailsService {
   @Autowired private AuthRepo authRepo;
   @Autowired private ClientRepo clientRepo;
   @Autowired private PersonRepo personRepo;
-  @Autowired private AccountRepo accountRepo;
   @Autowired private ResetPasswordTokenRepo resetPasswordTokenRepo;
   @Autowired private MailService mailService;
 
@@ -54,8 +51,6 @@ public class AuthService implements UserDetailsService {
       Client client = clientRepo.save(new Client(registerRequestDTO));
       registerRequestDTO.setPassword(passwordEncoder.encode(registerRequestDTO.getPassword()));
       Auth auth = new Auth(registerRequestDTO, client, new ArrayList<>(Arrays.asList("ROLE_USER")));
-      Account account = new Account(client);
-      accountRepo.save(account);
       authRepo.save(auth);
       return client;
     } catch (DataIntegrityViolationException e) {
