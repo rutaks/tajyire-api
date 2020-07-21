@@ -1,5 +1,8 @@
 package rw.tajyire.api.service;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -7,13 +10,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import rw.tajyire.api.dto.category.CategoryDTO;
 import rw.tajyire.api.dto.category.SubCategoryDTO;
 import rw.tajyire.api.exception.EntityNotFoundException;
 import rw.tajyire.api.model.Admin;
 import rw.tajyire.api.model.Category;
 import rw.tajyire.api.model.SubCategory;
-import rw.tajyire.api.repo.CategoryRepo;
 import rw.tajyire.api.repo.SubCategoryRepo;
 import rw.tajyire.api.util.AES;
 
@@ -22,9 +23,9 @@ public class SubCategoryService {
   @Autowired private SubCategoryRepo subCategoryRepo;
   @Autowired private CloudinaryService cloudinaryService;
 
-  public SubCategory findById(Long categoryId) {
+  public SubCategory findByUuId(String categoryUuId) {
     return subCategoryRepo
-        .findByIdAndDeletedIsFalse(categoryId)
+        .findByUuidAndDeletedIsFalse(categoryUuId)
         .orElseThrow(() -> new EntityNotFoundException("Could not find category"));
   }
 
@@ -41,8 +42,9 @@ public class SubCategoryService {
     return subCategoryRepo.save(newCategory);
   }
 
-  public SubCategory editCategory(Long subCategoryId, SubCategoryDTO subCategoryDTO, Admin admin) {
-    SubCategory foundCategory = findById(subCategoryId);
+  public SubCategory editCategory(
+      String subCategoryUuId, SubCategoryDTO subCategoryDTO, Admin admin) {
+    SubCategory foundCategory = findByUuId(subCategoryUuId);
     if (subCategoryDTO.getCoverImage() != null) {
       final String imageCoverUrl = cloudinaryService.uploadFile(subCategoryDTO.getCoverImage());
       foundCategory.setImageCover(imageCoverUrl);
@@ -55,10 +57,13 @@ public class SubCategoryService {
     return subCategoryRepo.save(foundCategory);
   }
 
-  public SubCategory removeCategory(Long subCategoryId, Admin admin) {
-    SubCategory foundCategory = findById(subCategoryId);
+  public SubCategory removeCategory(String subCategoryUuId, Admin admin) {
+    Date date = Calendar.getInstance().getTime();
+    DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
+    String strDate = dateFormat.format(date);
+    SubCategory foundCategory = findByUuId(subCategoryUuId);
     foundCategory.setDeleted(true);
-    foundCategory.setName(AES.encrypt(foundCategory.getName()));
+    foundCategory.setName(AES.encrypt(foundCategory.getName() + " <-DELETED ON:-> " + strDate ));
     return subCategoryRepo.save(foundCategory);
   }
 }

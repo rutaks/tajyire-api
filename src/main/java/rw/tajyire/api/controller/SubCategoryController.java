@@ -42,9 +42,9 @@ public class SubCategoryController {
     return ResponseEntity.ok(response);
   }
 
-  @GetMapping(value = "/{categoryId}")
-  public ResponseEntity<?> getSubCategory(@PathVariable Long categoryId) {
-    SubCategory categoryPage = subCategoryService.findById(categoryId);
+  @GetMapping(value = "/{subCategoryUuId}")
+  public ResponseEntity<?> getSubCategory(@PathVariable String subCategoryUuId) {
+    SubCategory categoryPage = subCategoryService.findByUuId(subCategoryUuId);
     ApiResponse response =
         new ApiResponse(HttpStatus.OK, "Category retrieved successfully", categoryPage);
     return ResponseEntity.ok(response);
@@ -63,26 +63,26 @@ public class SubCategoryController {
     return ResponseEntity.ok(response);
   }
 
-  @PutMapping(value = "/{categoryId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @PutMapping(value = "/{subCategoryUuId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<?> editSubCategory(
-      @PathVariable Long categoryId,
+      @PathVariable String subCategoryUuId,
       @AuthenticationPrincipal Auth auth,
       SubCategoryDTO subCategoryDTO,
       BindingResult bindingResult)
       throws Exception {
     ErrorUtil.checkForError(bindingResult);
     SubCategory editedCategory =
-        subCategoryService.editCategory(categoryId, subCategoryDTO, auth.getPerson().toAdmin());
+        subCategoryService.editCategory(subCategoryUuId, subCategoryDTO, auth.getPerson().toAdmin());
     ApiResponse response =
         new ApiResponse(HttpStatus.OK, "Category modified successfully", editedCategory);
     return ResponseEntity.ok(response);
   }
 
-  @DeleteMapping(value = "/{categoryId}")
+  @DeleteMapping(value = "/{subCategoryUuId}")
   public ResponseEntity<?> removeSubCategory(
-      @PathVariable Long categoryId, @AuthenticationPrincipal Auth auth) throws Exception {
+      @PathVariable String subCategoryUuId, @AuthenticationPrincipal Auth auth) throws Exception {
     SubCategory editedCategory =
-        subCategoryService.removeCategory(categoryId, auth.getPerson().toAdmin());
+        subCategoryService.removeCategory(subCategoryUuId, auth.getPerson().toAdmin());
     ApiResponse response =
         new ApiResponse(HttpStatus.OK, "Category removed successfully", editedCategory);
     return ResponseEntity.ok(response);

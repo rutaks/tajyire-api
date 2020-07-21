@@ -1,6 +1,10 @@
 package rw.tajyire.api.service;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,20 +26,28 @@ public class CategoryService {
   @Autowired private SubCategoryRepo subCategoryRepo;
   @Autowired private CloudinaryService cloudinaryService;
 
-  public Category findById(Long categoryId) {
+  public Category findByUuId(String categoryId) {
     return categoryRepo
-        .findByIdAndDeletedIsFalse(categoryId)
+        .findByUuidAndDeletedIsFalse(categoryId)
         .orElseThrow(() -> new EntityNotFoundException("Could not find category"));
   }
 
-  public Page<SubCategory> getCategoriesSubCategories(Long categoryId, int page, int size) {
+  public Page<SubCategory> getCategoriesSubCategories(String categoryUuId, int page, int size) {
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id"));
-    return subCategoryRepo.findByParentCategoryAndDeletedIsFalse(new Category(categoryId), pageable);
+    return subCategoryRepo.findByParentCategoryUuidAndDeletedIsFalse(categoryUuId, pageable);
+  }
+
+  public List<SubCategory> getCategoriesSubCategories(String categoryUuId) {
+    return subCategoryRepo.findByParentCategoryUuidAndDeletedIsFalse(categoryUuId);
   }
 
   public Page<Category> getCategories(int page, int size) {
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id"));
     return categoryRepo.findByDeletedIsFalse(pageable);
+  }
+
+  public List<Category> getCategories() {
+    return categoryRepo.findByDeletedIsFalse();
   }
 
   public Category createCategory(CategoryDTO categoryDTO, Admin admin) {
@@ -46,8 +58,8 @@ public class CategoryService {
     return categoryRepo.save(newCategory);
   }
 
-  public Category editCategory(Long categoryId, CategoryDTO categoryDTO, Admin admin) {
-    Category foundCategory = findById(categoryId);
+  public Category editCategory(String categoryUuId, CategoryDTO categoryDTO, Admin admin) {
+    Category foundCategory = findByUuId(categoryUuId);
     if (categoryDTO.getCoverImage() != null) {
       final String imageCoverUrl = cloudinaryService.uploadFile(categoryDTO.getCoverImage());
       foundCategory.setImageCover(imageCoverUrl);
@@ -59,10 +71,13 @@ public class CategoryService {
     return categoryRepo.save(foundCategory);
   }
 
-  public Category removeCategory(Long categoryId, Admin admin) {
-    Category foundCategory = findById(categoryId);
+  public Category removeCategory(String categoryId, Admin admin) {
+    Date date = Calendar.getInstance().getTime();
+    DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
+    String strDate = dateFormat.format(date);
+    Category foundCategory = findByUuId(categoryId);
     foundCategory.setDeleted(true);
-    foundCategory.setName(AES.encrypt(foundCategory.getName()));
+    foundCategory.setName(AES.encrypt(foundCategory.getName() + " <-DELETED ON:-> " + strDate ));
     return categoryRepo.save(foundCategory);
   }
 }
