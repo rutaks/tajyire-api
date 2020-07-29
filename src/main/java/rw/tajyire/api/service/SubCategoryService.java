@@ -14,14 +14,21 @@ import rw.tajyire.api.dto.category.SubCategoryDTO;
 import rw.tajyire.api.exception.EntityNotFoundException;
 import rw.tajyire.api.model.Admin;
 import rw.tajyire.api.model.Category;
+import rw.tajyire.api.model.Product;
 import rw.tajyire.api.model.SubCategory;
+import rw.tajyire.api.repo.ProductRepo;
 import rw.tajyire.api.repo.SubCategoryRepo;
 import rw.tajyire.api.util.AES;
 
 @Service
 public class SubCategoryService {
-  @Autowired private SubCategoryRepo subCategoryRepo;
-  @Autowired private CloudinaryService cloudinaryService;
+
+  @Autowired
+  private SubCategoryRepo subCategoryRepo;
+  @Autowired
+  private ProductRepo productRepo;
+  @Autowired
+  private CloudinaryService cloudinaryService;
 
   public SubCategory findByUuId(String categoryUuId) {
     return subCategoryRepo
@@ -32,6 +39,11 @@ public class SubCategoryService {
   public Page<SubCategory> getSubCategories(int page, int size) {
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id"));
     return subCategoryRepo.findByDeletedIsFalse(pageable);
+  }
+
+  public Page<Product> getSubCategoryProducts(String subCategoryUuId, int page, int size) {
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id"));
+    return productRepo.getAllByCategoryUuidAndDeletedIsFalse(pageable, subCategoryUuId);
   }
 
   public SubCategory createSubCategory(SubCategoryDTO subCategoryDTO, Admin admin) {
