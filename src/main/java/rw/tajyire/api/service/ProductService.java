@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import rw.tajyire.api.dto.product.ProductCreationDTO;
 import rw.tajyire.api.dto.product.ProductModificationDTO;
 import rw.tajyire.api.exception.EntityNotFoundException;
+import rw.tajyire.api.exception.OperationFailedException;
 import rw.tajyire.api.model.Admin;
 import rw.tajyire.api.model.Product;
 import rw.tajyire.api.model.SubCategory;
@@ -42,6 +43,17 @@ public class ProductService {
   }
 
   public Product createProduct(ProductCreationDTO dto, Admin admin) throws ParseException {
+    Product product = new Product();
+    product.setName(dto.getName());
+    product.setPrice(dto.getPrice());
+    product.setPriceCurrency(dto.getPriceCurrency());
+    product.setCategory(new SubCategory(dto.getCategoryId()));
+    product.setCreatedBy(admin.getUuid());
+    if (dto.getDiscountPrice() != null) {
+      product.setDiscountExpiryDate(
+          new SimpleDateFormat("EEE MMM DD YYYY HH:MM:ss 'GMT'Z").parse(dto.getDiscountExpiryDate()));
+      product.setDiscountPrice(dto.getDiscountPrice());
+    }
     List<String> images = new ArrayList<>();
     Arrays.asList(dto.getImages()).stream()
         .forEach(
@@ -49,19 +61,7 @@ public class ProductService {
               images.add(cloudinaryService.uploadFile(image));
             });
     String imageUrlsStr = JSONArray.toJSONString(images);
-
-    Product product = new Product();
-    product.setName(dto.getName());
-    product.setPrice(dto.getPrice());
-    product.setPriceCurrency(dto.getPriceCurrency());
-    product.setCategory(new SubCategory(dto.getCategoryId()));
     product.setImageUrls(imageUrlsStr);
-    product.setCreatedBy(admin.getUuid());
-    if (dto.getDiscountPrice() != null) {
-      product.setDiscountExpiryDate(
-          new SimpleDateFormat("dd/MM/yyyy").parse(dto.getDiscountExpiryDate()));
-      product.setDiscountPrice(dto.getDiscountPrice());
-    }
     return productRepo.save(product);
   }
 
@@ -70,18 +70,22 @@ public class ProductService {
 
     Product product = findByUuId(productUuId);
     List<String> images = new ArrayList<>();
-    Arrays.asList(dto.getNewImages()).stream()
-        .forEach(
-            image -> {
-              images.add(cloudinaryService.uploadFile(image));
-            });
+    if(dto.getNewImages() != null){
+      Arrays.asList(dto.getNewImages()).stream()
+          .forEach(
+              image -> {
+                images.add(cloudinaryService.uploadFile(image));
+              });
+    }
     JSONParser parser = new JSONParser();
     JSONArray array = (JSONArray) parser.parse(product.getImageUrls());
     if (array != null) {
       images.addAll(array);
     }
-    for (String removedImage : dto.getRemovedImage()) {
-      images.remove(removedImage);
+    if(dto.getRemovedImages() != null ){
+      for (String removedImage : dto.getRemovedImages()) {
+        images.remove(removedImage);
+      }
     }
     String imageUrlsStr = JSONArray.toJSONString(images);
     product.setName(dto.getName());
@@ -91,8 +95,18 @@ public class ProductService {
     product.setImageUrls(imageUrlsStr);
     product.setCreatedBy(admin.getUuid());
     if (dto.getDiscountPrice() != null) {
-      product.setDiscountExpiryDate(
-          new SimpleDateFormat("dd/MM/yyyy").parse(dto.getDiscountExpiryDate()));
+      try{
+        product.setDiscountExpiryDate(
+            new SimpleDateFormat("EEE MMM DD YYYY HH:MM:ss 'GMT'Z").parse(dto.getDiscountExpiryDate()));
+      } catch (ParseException e) {
+        try{
+          product.setDiscountExpiryDate(
+              new SimpleDateFormat("yyyy-mm-dd'T'hh:mm:ss").parse(dto.getDiscountExpiryDate()));
+          System.out.println("WORKED");
+        } catch (ParseException ex){
+          throw new OperationFailedException(ex.getMessage());
+        }
+      }
       product.setDiscountPrice(dto.getDiscountPrice());
     }
     return productRepo.save(product);

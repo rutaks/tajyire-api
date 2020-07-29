@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import rw.tajyire.api.dto.product.ProductCreationDTO;
 import rw.tajyire.api.dto.product.ProductModificationDTO;
+import rw.tajyire.api.exception.OperationFailedException;
 import rw.tajyire.api.exception.ValidationException;
 import rw.tajyire.api.model.ApiResponse;
 import rw.tajyire.api.model.Auth;
@@ -65,7 +66,11 @@ public class ProductController {
           new ApiResponse(HttpStatus.OK, "Product created successfully", newProduct);
       return ResponseEntity.ok(response);
     } catch (ParseException e) {
+      e.printStackTrace();
       throw new ValidationException("Provide proper discount date ");
+    }catch (Exception e){
+      e.printStackTrace();
+      throw new OperationFailedException("Could not process request, Error: " + e.getMessage());
     }
   }
 

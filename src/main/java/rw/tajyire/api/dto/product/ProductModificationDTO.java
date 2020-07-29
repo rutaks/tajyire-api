@@ -23,7 +23,7 @@ public class ProductModificationDTO {
   private Double discountPrice;
   private String discountExpiryDate;
   private MultipartFile[] newImages;
-  private String[] removedImage;
+  private String[] removedImages;
   @NotNull(message = "Product should have a Category")
   private Long categoryId;
 }

@@ -2,6 +2,7 @@ package rw.tajyire.api.model;
 
 import java.util.Date;
 import java.util.UUID;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -13,7 +14,6 @@ import javax.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import rw.tajyire.api.dto.product.ProductCreationDTO;
 
 @Data
 @AllArgsConstructor
@@ -25,11 +25,12 @@ public class Product {
   private long id;
   private String uuid = UUID.randomUUID().toString();
   private String name;
+  @Column(columnDefinition="TEXT")
   private String imageUrls;
   private Double price;
   private String priceCurrency;
   private Double discountPrice;
-  @Temporal(TemporalType.DATE)
+  @Temporal(TemporalType.TIMESTAMP)
   private Date discountExpiryDate;
   private String createdBy;
   @Temporal(TemporalType.TIMESTAMP)
