@@ -22,9 +22,11 @@ import rw.tajyire.api.dto.auth.RegisterRequestDTO;
 import rw.tajyire.api.dto.auth.RegisterResponseDTO;
 import rw.tajyire.api.dto.auth.ResetPasswordDTO;
 import rw.tajyire.api.exception.CustomAuthenticationException;
+import rw.tajyire.api.model.Admin;
 import rw.tajyire.api.model.ApiResponse;
 import rw.tajyire.api.model.Auth;
 import rw.tajyire.api.model.Person;
+import rw.tajyire.api.service.AdminService;
 import rw.tajyire.api.service.AuthService;
 import rw.tajyire.api.util.ConstantUtil;
 import rw.tajyire.api.util.ErrorUtil;
@@ -35,9 +37,15 @@ import rw.tajyire.api.util.JwtUtil;
 public class AuthController {
 
   private static final String ACCOUNT_NOT_FOUND_MESSAGE = "Incorrect username or password";
-  @Autowired private AuthenticationManager authManager;
-  @Autowired private AuthService userDetailsService;
-  @Autowired private JwtUtil jwtUtil;
+  private static final String INACTIVE_ACCOUNT_MESSAGE = "Your account is not active";
+  @Autowired
+  private AuthenticationManager authManager;
+  @Autowired
+  private AuthService userDetailsService;
+  @Autowired
+  private AdminService adminService;
+  @Autowired
+  private JwtUtil jwtUtil;
 
   @PostMapping("/admin-login")
   public ResponseEntity<?> adminLogin(
@@ -45,8 +53,12 @@ public class AuthController {
       throws Exception {
     try {
       final Auth userDetails = getAccount(authRequestDTO, bindingResult);
-      if (!userDetailsService.isAdmin(userDetails.getPerson()))
+      if (!userDetailsService.isAdmin(userDetails.getPerson())) {
         throw new CustomAuthenticationException(ACCOUNT_NOT_FOUND_MESSAGE);
+      }
+      if (!userDetailsService.isActiveAdmin(userDetails.getPerson())) {
+        throw new CustomAuthenticationException(INACTIVE_ACCOUNT_MESSAGE);
+      }
       final String jwt = jwtUtil.generateToken(userDetails);
       AuthResponseDTO dto = new AuthResponseDTO(jwt, userDetails.getPerson());
       ApiResponse response = new ApiResponse(HttpStatus.OK, "Login Successful", dto);
@@ -93,9 +105,10 @@ public class AuthController {
       @Valid @RequestBody ResetPasswordDTO resetPasswordDTO,
       BindingResult bindingResult) {
     ErrorUtil.checkForError(bindingResult);
-    userDetailsService.resetPassword(token, resetPasswordDTO);
+    Auth auth = userDetailsService.resetPassword(token, resetPasswordDTO);
+    Admin admin = adminService.activateAdmin(auth.getPerson().toAdmin());
     ApiResponse response =
-        new ApiResponse(HttpStatus.OK, "Account was validated successfully", null);
+        new ApiResponse(HttpStatus.OK, "Account was validated successfully", admin);
     return ResponseEntity.ok(response);
   }
 

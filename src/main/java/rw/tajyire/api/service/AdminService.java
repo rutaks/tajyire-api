@@ -7,12 +7,17 @@ import java.util.Date;
 import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import rw.tajyire.api.dto.auth.AdminCreationDTO;
 import rw.tajyire.api.model.Admin;
 import rw.tajyire.api.model.Auth;
 import rw.tajyire.api.model.Person;
+import rw.tajyire.api.model.Product;
 import rw.tajyire.api.model.ResetPasswordToken;
 import rw.tajyire.api.repo.AdminRepo;
 import rw.tajyire.api.repo.AuthRepo;
@@ -27,6 +32,11 @@ public class AdminService {
   @Autowired private AdminRepo adminRepo;
   @Autowired private ResetPasswordTokenRepo resetPasswordTokenRepo;
   @Autowired private MailService mailService;
+
+  public Page<Admin> getAdmins(int page, int size) {
+    Pageable pageable = PageRequest.of(page, size);
+    return adminRepo.findAll(pageable);
+  }
 
   public Person createAdmin(AdminCreationDTO adminCreationDTO, HttpServletRequest request)
       throws IOException {
@@ -60,5 +70,10 @@ public class AdminService {
             + "\n use the following link to validate your account: \n"
             + url);
     return newAdmin;
+  }
+
+  public Admin activateAdmin(Admin admin){
+    admin.setActive(true);
+    return adminRepo.save(admin);
   }
 }

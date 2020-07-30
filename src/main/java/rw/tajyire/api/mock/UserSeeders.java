@@ -42,6 +42,7 @@ public class UserSeeders {
   public void seedUsersTable() {
     try {
       Admin admin = new Admin("Admin", "One", "male", new Date(), "rutaksam@gmail.com");
+      admin.setActive(true);
       adminRepo.save(admin);
       Auth auth1 = new Auth(admin, "admin1", passwordEncoder.encode("Password123!"), adminRole);
       authRepo.save(auth1);

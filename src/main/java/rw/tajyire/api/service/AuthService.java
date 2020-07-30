@@ -60,7 +60,7 @@ public class AuthService implements UserDetailsService {
     }
   }
 
-  public void resetPassword(String token, ResetPasswordDTO resetPasswordDTO) {
+  public Auth resetPassword(String token, ResetPasswordDTO resetPasswordDTO) {
     Optional<ResetPasswordToken> resetPasswordToken = resetPasswordTokenRepo.findByToken(token);
     resetPasswordToken.orElseThrow(
         () -> new EntityNotFoundException("Reset Password request not found"));
@@ -76,13 +76,13 @@ public class AuthService implements UserDetailsService {
 
     Optional<Auth> auth = authRepo.findByResetPasswordTokens(resetPasswordToken.get());
     auth.orElseThrow(() -> new EntityNotFoundException("Account was not found"));
-
     auth.get().setPassword(passwordEncoder.encode(resetPasswordDTO.getPassword()));
 
     authRepo.save(auth.get());
 
     resetPasswordToken.get().setActive(false);
     resetPasswordTokenRepo.save(resetPasswordToken.get());
+    return auth.get();
   }
 
   public void sendForgotPasswordRequest(String email, HttpServletRequest request)
@@ -120,6 +120,14 @@ public class AuthService implements UserDetailsService {
 
   public boolean isAdmin(Person person) {
     return person.getClass().isAssignableFrom(Admin.class);
+  }
+
+  public boolean isActiveAdmin(Person person) {
+    if(isAdmin(person)){
+      Admin admin = (Admin) person;
+      return admin.isActive();
+    }
+    return false;
   }
 
   public boolean isClient(Person person) {
